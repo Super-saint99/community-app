@@ -1,56 +1,79 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kummari Sangham Community Society</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kummari Sangham Community Society</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <header>
-        <h1>Kummari Sangham</h1>
-        <p>Community Society Dashboard</p>
-    </header>
+  <header>
+    <h1>Kummari Sangham</h1>
+    <p>Community Society Finance Dashboard</p>
+  </header>
 
-    <section class="form-section">
-        <input type="text" id="memberName" placeholder="Member name">
-        <input type="number" id="shareAmount" placeholder="Share amount (₹)">
-        <input type="number" id="amountAddition" placeholder="Amount addition (₹)">
-        <input type="number" id="loanAmount" placeholder="Loan sanctioned (₹)">
-        <input type="number" id="interestRate" placeholder="Interest % (per year)">
-        <input type="number" id="tenor" placeholder="Tenor (months)">
-        <input type="number" id="monthsPaid" placeholder="Months paid">
-        <button class="add-btn" onclick="addMember()">➕ Add Member</button>
-    </section>
+  <section class="form-section">
+    <input type="text" id="memberName" placeholder="Member name" />
+    <input type="number" id="shareAmount" placeholder="Share amount (₹)" />
+    <input type="number" id="amountAddition" placeholder="Amount addition (₹)" />
+    <input type="number" id="loanAmount" placeholder="Loan sanctioned (₹)" />
+    <input type="number" id="interestRate" placeholder="Interest % (per year)" />
+    <input type="number" id="tenor" placeholder="Tenor (months)" />
+    <input type="number" id="monthsPaid" placeholder="EMIs paid" />
+    <button class="add-btn" id="btnAdd">➕ Add Member</button>
+  </section>
 
-    <section class="table-section">
-        <table id="membersTable">
-            <thead>
-                <tr>
-                    <th>Member Name</th>
-                    <th>Share (₹)</th>
-                    <th>Addition (₹)</th>
-                    <th>Loan (₹)</th>
-                    <th>Interest %</th>
-                    <th>Tenor (m)</th>
-                    <th>Months Paid</th>
-                    <th>EMI (₹)</th>
-                    <th>Outstanding (₹)</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </section>
+  <section class="table-section">
+    <table id="membersTable">
+      <thead>
+        <tr>
+          <th>Member Name</th>
+          <th>Share (₹)</th>
+          <th>Addition (₹)</th>
+          <th>Loan (₹)</th>
+          <th>Interest %</th>
+          <th>Tenor (m)</th>
+          <th>EMIs Paid</th>
+          <th>EMIs Remaining</th>
+          <th>EMI (₹)</th>
+          <th>Outstanding (₹)</th>
+          <th>Next EMI Due (₹)</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
 
-    <section class="summary">
-        <p>Total Members: <span id="totalMembers">0</span></p>
-        <p>Total Share/month: ₹<span id="totalShare">0</span></p>
-        <p>Total Additions/month: ₹<span id="totalAdditions">0</span></p>
-        <p>Total EMI this month: ₹<span id="totalEMI">0</span></p>
-        <button class="whatsapp-btn" onclick="sendToWhatsApp()">📤 Send Summary to WhatsApp</button>
-    </section>
+  <section class="summary">
+    <div class="cards">
+      <div class="card">
+        <div class="label">Total Members</div>
+        <div class="value" id="totalMembers">0</div>
+      </div>
+      <div class="card">
+        <div class="label">Total Share / month</div>
+        <div class="value">₹<span id="totalShare">0</span></div>
+      </div>
+      <div class="card">
+        <div class="label">Total Additions / month</div>
+        <div class="value">₹<span id="totalAdditions">0</span></div>
+      </div>
+      <div class="card">
+        <div class="label">Total EMI (sum)</div>
+        <div class="value">₹<span id="totalEMI">0</span></div>
+      </div>
+    </div>
 
-    <script src="app.js"></script>
+    <div class="actions">
+      <input id="waPhone" class="phone" placeholder="WhatsApp number (optional, e.g. 91XXXXXXXXXX)" />
+      <button class="whatsapp-btn" id="btnWhatsApp">📤 Send Summary to WhatsApp</button>
+      <button class="export-btn" id="btnExport">📄 Export CSV</button>
+      <button class="ghost-btn" id="btnClearAll">🧹 Clear All (local)</button>
+    </div>
+    <p class="muted">Tip: This is 100% front‑end. Data saves in your browser (LocalStorage). Export CSV each month for records.</p>
+  </section>
+
+  <script src="app.js"></script>
 </body>
 </html>
