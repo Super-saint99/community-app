@@ -1,136 +1,92 @@
-// Utility functions
-const fmt = (n)=> {
-  n = Number(n||0);
-  return n.toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2});
-};
-const parseNum = (v)=> isNaN(parseFloat(v)) ? 0 : parseFloat(v);
-function computeEMI(P, annualRatePct, nMonths){
-  P = parseNum(P); nMonths = parseInt(nMonths||0,10);
-  const r = parseNum(annualRatePct)/12/100;
-  if(P<=0 || r<=0 || nMonths<=0) return 0;
-  const pow = Math.pow(1+r, nMonths);
-  return P * r * pow / (pow - 1);
-}
-function currentMonthInterest(remainingPrincipal, annualRatePct){
-  const r = parseNum(annualRatePct)/12/100;
-  return parseNum(remainingPrincipal) * r;
-}
-function payOneEMI(member){
-  const emi = parseNum(member.emi);
-  if(emi<=0) return null;
-  const interest = currentMonthInterest(member.remaining, member.rate);
-  const principalPaid = Math.min(emi - interest, member.remaining);
-  const newRemaining = Math.max(0, member.remaining - principalPaid);
-  const monthsPaid = Math.min(member.months, member.monthsPaid + 1);
-  return {interest, principalPaid, newRemaining, monthsPaid};
-}
-
-// State
-const STORE_KEY = 'kummari_sangham_members_v1';
 let members = [];
-function save(){ localStorage.setItem(STORE_KEY, JSON.stringify(members)); }
-function load(){
-  try{
-    const raw = localStorage.getItem(STORE_KEY);
-    if(raw){ members = JSON.parse(raw); }
-  }catch(e){ members = []; }
-}
-load();
 
-// DOM references
-const els = {
-  body: document.getElementById('body'),
-  checkAll: document.getElementById('check-all'),
-  addBtn: document.getElementById('add-member'),
-  inputs:{
-    name: document.getElementById('m-name'),
-    share: document.getElementById('m-share'),
-    amount: document.getElementById('m-amount'),
-    loan: document.getElementById('m-loan'),
-    rate: document.getElementById('m-rate'),
-    tenor: document.getElementById('m-tenor'),
-  },
-  sumMembers: document.getElementById('sum-members'),
-  sumShare: document.getElementById('sum-share'),
-  sumAmount: document.getElementById('sum-amount'),
-  sumEmiPaid: document.getElementById('sum-emi-paid'),
-  sumTotal: document.getElementById('sum-total'),
-  btnDelete: document.getElementById('delete-selected'),
-  btnCloseMonth: document.getElementById('close-month'),
-  btnWhatsApp: document.getElementById('send-whatsapp'),
-  waPhone: document.getElementById('wa-phone'),
-  exportBtn: document.getElementById('export-json'),
-  importInput: document.getElementById('import-json'),
+// Load from localStorage when page opens
+window.onload = function () {
+    members = JSON.parse(localStorage.getItem("members")) || [];
+    renderTable();
 };
 
-// Rendering
-function newRowTemplate(m){
-  const id = m.id;
-  return `
-    <tr data-id="${id}">
-      <td><input type="checkbox" class="row-check" /></td>
-      <td><input class="cell name" value="${m.name||''}" /></td>
-      <td><input type="number" class="cell amount" min="0" step="0.01" value="${m.amount||0}"/></td>
-      <td><input type="number" class="cell share" min="0" step="0.01" value="${m.share||0}"/></td>
-      <td><input type="number" class="cell loan" min="0" step="0.01" value="${m.loan||0}"/></td>
-      <td><input type="number" class="cell rate" min="0" step="0.01" value="${m.rate||0}"/></td>
-      <td><input type="number" class="cell months" min="1" step="1" value="${m.months||0}"/></td>
-      <td><span class="pill mono monthsPaid">${m.monthsPaid||0}</span></td>
-      <td><span class="pill mono emi">${fmt(m.emi||0)}</span></td>
-      <td><span class="pill mono interest">${fmt(m.thisMonthInterest||0)}</span></td>
-      <td><span class="pill mono remaining">${fmt(m.remaining||0)}</span></td>
-      <td>
-        <div class="actions">
-          <button class="btn secondary pay-emi">Pay EMI</button>
-          <button class="btn ghost recalc">Recalculate</button>
-          <button class="btn ghost reset-loan">Reset loan</button>
-        </div>
-      </td>
-    </tr>
-  `;
-}
-function render(){
-  els.body.innerHTML = members.map(newRowTemplate).join('');
-  bindRowEvents();
-  updateSummary();
-}
-function updateSummary(){
-  const sumMembers = members.length;
-  const sumShare = members.reduce((s,m)=> s + parseNum(m.share||0),0);
-  const sumAmount = members.reduce((s,m)=> s + parseNum(m.amount||0),0);
-  const sumEmiPaid = members.reduce((s,m)=> s + parseNum(m.emiPaidThisMonth||0),0);
-  const sumTotal = sumShare + sumAmount + sumEmiPaid;
-  els.sumMembers.textContent = sumMembers;
-  els.sumShare.textContent = fmt(sumShare);
-  els.sumAmount.textContent = fmt(sumAmount);
-  els.sumEmiPaid.textContent = fmt(sumEmiPaid);
-  els.sumTotal.textContent = fmt(sumTotal);
+function addMember() {
+    let name = document.getElementById("memberName").value.trim();
+    if (!name) {
+        alert("Please enter a member name");
+        return;
+    }
+
+    let share = parseFloat(document.getElementById("shareAmount").value) || 0;
+    let addition = parseFloat(document.getElementById("amountAddition").value) || 0;
+    let loan = parseFloat(document.getElementById("loanAmount").value) || 0;
+    let interest = parseFloat(document.getElementById("interestRate").value) || 0;
+    let tenor = parseInt(document.getElementById("tenor").value) || 0;
+    let monthsPaid = parseInt(document.getElementById("monthsPaid").value) || 0;
+
+    let emi = calculateEMI(loan, interest, tenor);
+    let outstanding = calculateOutstanding(loan, interest, tenor, monthsPaid);
+
+    members.push({ name, share, addition, loan, interest, tenor, monthsPaid, emi, outstanding });
+
+    // Save to localStorage
+    localStorage.setItem("members", JSON.stringify(members));
+
+    renderTable();
+
+    // Clear form
+    document.querySelectorAll(".form-section input").forEach(i => i.value = "");
 }
 
-// Row helpers
-function recalcMember(m){
-  m.emi = computeEMI(m.loan, m.rate, m.months);
-  m.thisMonthInterest = currentMonthInterest(m.remaining, m.rate);
+function calculateEMI(principal, annualRate, months) {
+    let monthlyRate = (annualRate / 100) / 12;
+    return principal > 0 && months > 0
+        ? (principal * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -months))
+        : 0;
 }
-function ensureDerived(m){
-  if(typeof m.monthsPaid !== 'number') m.monthsPaid = 0;
-  if(typeof m.emiPaidThisMonth !== 'number') m.emiPaidThisMonth = 0;
-  if(typeof m.remaining !== 'number') m.remaining = parseNum(m.loan);
-  m.emi = computeEMI(m.loan, m.rate, m.months);
-  m.thisMonthInterest = currentMonthInterest(m.remaining, m.rate);
-}
-function bindRowEvents(){
-  els.body.querySelectorAll('tr').forEach(tr=>{
-    const id = tr.dataset.id;
-    const m = members.find(x=> x.id === id);
-    if(!m) return;
-    const q = (sel)=> tr.querySelector(sel);
 
-    q('input.cell.name').addEventListener('input', e=>{ m.name = e.target.value; save(); });
-    q('input.cell.amount').addEventListener('input', e=>{ m.amount = parseNum(e.target.value); save(); updateSummary(); });
-    q('input.cell.share').addEventListener('input', e=>{ m.share = parseNum(e.target.value); save(); updateSummary(); });
-    q('input.cell.loan').addEventListener('input', e=>{
-      m.loan = parseNum(e.target.value);
-      m.remaining = m.loan; recalcMember(m); refreshRow(tr, m); save();
+function calculateOutstanding(principal, annualRate, months, monthsPaid) {
+    let emi = calculateEMI(principal, annualRate, months);
+    let monthlyRate = (annualRate / 100) / 12;
+    let outstanding = principal;
+    for (let i = 0; i < monthsPaid; i++) {
+        let interestPayment = outstanding * monthlyRate;
+        let principalPayment = emi - interestPayment;
+        outstanding -= principalPayment;
+    }
+    return Math.max(outstanding, 0);
+}
+
+function renderTable() {
+    let tbody = document.querySelector("#membersTable tbody");
+    tbody.innerHTML = "";
+
+    let totalShare = 0, totalAdditions = 0, totalEMI = 0;
+
+    members.forEach((m, index) => {
+        totalShare += m.share;
+        totalAdditions += m.addition;
+        totalEMI += m.emi;
+
+        let row = `<tr>
+            <td><input type="checkbox" data-index="${index}"></td>
+            <td>${m.name}</td>
+            <td>${m.share}</td>
+            <td>${m.addition}</td>
+            <td>${m.loan}</td>
+            <td>${m.interest}%</td>
+            <td>${m.tenor}</td>
+            <td>${m.monthsPaid}</td>
+            <td>${m.emi.toFixed(2)}</td>
+            <td>${m.outstanding.toFixed(2)}</td>
+        </tr>`;
+        tbody.innerHTML += row;
     });
-    q('input.cell.rate').addEventListener('input', e=>{ m.rate = parse
+
+    document.getElementById("totalMembers").innerText = members.length;
+    document.getElementById("totalShare").innerText = totalShare;
+    document.getElementById("totalAdditions").innerText = totalAdditions;
+    document.getElementById("totalEMI").innerText = totalEMI.toFixed(2);
+}
+
+function sendToWhatsApp() {
+    let message = `Kummari Sangham Summary:\nMembers: ${members.length}\nTotal Share/month: ₹${document.getElementById("totalShare").innerText}\nTotal Additions/month: ₹${document.getElementById("totalAdditions").innerText}\nTotal EMI this month: ₹${document.getElementById("totalEMI").innerText}`;
+    let url = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.open(url, "_blank");
+}
