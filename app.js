@@ -1,6 +1,5 @@
 let members = [];
 
-// Load from localStorage when page opens
 window.onload = function () {
     members = JSON.parse(localStorage.getItem("members")) || [];
     renderTable();
@@ -25,13 +24,10 @@ function addMember() {
 
     members.push({ name, share, addition, loan, interest, tenor, monthsPaid, emi, outstanding });
 
-    // Save to localStorage
     localStorage.setItem("members", JSON.stringify(members));
 
     renderTable();
-
-    // Clear form
-    document.querySelectorAll(".form-section input").forEach(i => i.value = "");
+    clearForm();
 }
 
 function calculateEMI(principal, annualRate, months) {
@@ -65,7 +61,6 @@ function renderTable() {
         totalEMI += m.emi;
 
         let row = `<tr>
-            <td><input type="checkbox" data-index="${index}"></td>
             <td>${m.name}</td>
             <td>${m.share}</td>
             <td>${m.addition}</td>
@@ -75,6 +70,7 @@ function renderTable() {
             <td>${m.monthsPaid}</td>
             <td>${m.emi.toFixed(2)}</td>
             <td>${m.outstanding.toFixed(2)}</td>
+            <td><button class="remove-btn" onclick="removeMember(${index})">Remove</button></td>
         </tr>`;
         tbody.innerHTML += row;
     });
@@ -85,8 +81,20 @@ function renderTable() {
     document.getElementById("totalEMI").innerText = totalEMI.toFixed(2);
 }
 
+function removeMember(index) {
+    if (confirm("Are you sure you want to remove this member?")) {
+        members.splice(index, 1);
+        localStorage.setItem("members", JSON.stringify(members));
+        renderTable();
+    }
+}
+
 function sendToWhatsApp() {
     let message = `Kummari Sangham Summary:\nMembers: ${members.length}\nTotal Share/month: ₹${document.getElementById("totalShare").innerText}\nTotal Additions/month: ₹${document.getElementById("totalAdditions").innerText}\nTotal EMI this month: ₹${document.getElementById("totalEMI").innerText}`;
     let url = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(url, "_blank");
+}
+
+function clearForm() {
+    document.querySelectorAll(".form-section input").forEach(i => i.value = "");
 }
