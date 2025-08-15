@@ -20,14 +20,13 @@
         <input type="number" id="interestRate" placeholder="Interest % (per year)">
         <input type="number" id="tenor" placeholder="Tenor (months)">
         <input type="number" id="monthsPaid" placeholder="Months paid">
-        <button onclick="addMember()">Add Member</button>
+        <button class="add-btn" onclick="addMember()">➕ Add Member</button>
     </section>
 
     <section class="table-section">
         <table id="membersTable">
             <thead>
                 <tr>
-                    <th>Select</th>
                     <th>Member Name</th>
                     <th>Share (₹)</th>
                     <th>Addition (₹)</th>
@@ -37,6 +36,7 @@
                     <th>Months Paid</th>
                     <th>EMI (₹)</th>
                     <th>Outstanding (₹)</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -48,7 +48,7 @@
         <p>Total Share/month: ₹<span id="totalShare">0</span></p>
         <p>Total Additions/month: ₹<span id="totalAdditions">0</span></p>
         <p>Total EMI this month: ₹<span id="totalEMI">0</span></p>
-        <button onclick="sendToWhatsApp()">Send Summary to WhatsApp</button>
+        <button class="whatsapp-btn" onclick="sendToWhatsApp()">📤 Send Summary to WhatsApp</button>
     </section>
 
     <script src="script.js"></script>
