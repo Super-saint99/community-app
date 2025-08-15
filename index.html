@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>kummari sangham community society</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>kummari sangham community society</h1>
+    <div class="sub">Community finance dashboard — add members, track shares & loans, compute EMI with declining interest, and share monthly totals to WhatsApp.</div>
+  </header>
+
+  <div class="wrap">
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="row">
+        <div class="field">
+          <label>Member name</label>
+          <input id="m-name" placeholder="e.g. Sita R." />
+        </div>
+        <div class="field">
+          <label>Share amount (₹ / month)</label>
+          <input id="m-share" type="number" min="0" step="0.01" placeholder="0" />
+        </div>
+        <div class="field">
+          <label>Amount addition (₹ / month)</label>
+          <input id="m-amount" type="number" min="0" step="0.01" placeholder="0" />
+        </div>
+        <div class="field">
+          <label>Loan sanctioned (₹)</label>
+          <input id="m-loan" type="number" min="0" step="0.01" placeholder="0" />
+        </div>
+        <div class="field">
+          <label>Interest % (per year)</label>
+          <input id="m-rate" type="number" min="0" step="0.01" placeholder="12" />
+        </div>
+        <div class="field">
+          <label>Tenor (months)</label>
+          <input id="m-tenor" type="number" min="1" step="1" placeholder="12" />
+        </div>
+      </div>
+      <div>
+        <button class="btn" id="add-member">Add member</button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <table id="grid">
+        <thead>
+          <tr>
+            <th><input type="checkbox" id="check-all" title="Select all" /></th>
+            <th>Member name</th>
+            <th>Amount (₹)</th>
+            <th>Share (₹)</th>
+            <th>Loan (₹)</th>
+            <th>Interest % p.a.</th>
+            <th>Tenor (m)</th>
+            <th>Months paid</th>
+            <th>EMI (₹)</th>
+            <th>This month interest (₹)</th>
+            <th>Outstanding (₹)</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="body">
+          <!-- rows injected here -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Summary -->
+    <div class="summary" id="summary">
+      <div class="card">
+        <h3>Members</h3>
+        <div class="big" id="sum-members">0</div>
+      </div>
+      <div class="card">
+        <h3>Total share (₹ / month)</h3>
+        <div class="big" id="sum-share">0</div>
+      </div>
+      <div class="card">
+        <h3>Total additions (₹ / month)</h3>
+        <div class="big" id="sum-amount">0</div>
+      </div>
+      <div class="card">
+        <h3>EMI paid this month (₹)</h3>
+        <div class="big" id="sum-emi-paid">0</div>
+        <div class="muted">Use “Pay EMI” to book payments</div>
+      </div>
+      <div class="card">
+        <h3>Total received this month (₹)</h3>
+        <div class="big" id="sum-total">0</div>
+        <div class="muted">= Share + Amount + EMI paid (this month)</div>
+      </div>
+    </div>
+
+    <!-- Footer actions -->
+    <div class="foot-actions">
+      <div class="field" style="min-width:240px">
+        <label>WhatsApp number (optional, with country code, e.g. 91XXXXXXXXXX)</label>
+        <input id="wa-phone" placeholder="e.g. 91XXXXXXXXXX" />
+      </div>
+      <button class="btn secondary" id="export-json">Export JSON</button>
+      <label class="btn ghost" for="import-json">Import JSON<input id="import-json" type="file" accept="application/json" class="hide"></label>
+      <button class="btn warn" id="close-month" title="Clears 'this month' counters for Amount/Share/EMI paid">Close month</button>
+      <button class="btn danger" id="delete-selected">Delete selected</button>
+      <button class="btn" id="send-whatsapp">Send WhatsApp summary</button>
+    </div>
+
+    <div class="muted" style="margin-top:8px">
+      Note: This is a front-end only tool. WhatsApp sending opens a pre-filled message—you choose the recipient and confirm in WhatsApp.
+    </div>
+  </div>
+
+<script src="app.js"></script>
+</body>
+</html>
